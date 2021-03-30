@@ -10,20 +10,15 @@ import br.com.alura.technews.R
 import br.com.alura.technews.database.AppDatabase
 import br.com.alura.technews.model.Noticia
 import br.com.alura.technews.repository.NoticiaRepository
-import br.com.alura.technews.ui.activity.extensions.mostraErro
 import br.com.alura.technews.ui.recyclerview.adapter.ListaNoticiasAdapter
 import br.com.alura.technews.ui.viewmodel.ListaNoticiasViewModel
 import br.com.alura.technews.ui.viewmodel.ListaNoticiasViewModelFactory
 import kotlinx.android.synthetic.main.activity_lista_noticias.*
 
 private const val TITULO_APPBAR = "Notícias"
-private const val MENSAGEM_FALHA_CARREGAR_NOTICIAS = "Não foi possível carregar as novas notícias"
 
 class ListaNoticiasActivity : AppCompatActivity() {
 
-    //    private val repository by lazy {
-//        NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
-//    }
     private val adapter by lazy {
         ListaNoticiasAdapter(context = this)
     }
@@ -65,13 +60,9 @@ class ListaNoticiasActivity : AppCompatActivity() {
     }
 
     private fun buscaNoticias() {
-        viewModel.buscaTodos(
-            quandoSucesso = {
-                adapter.atualiza(it)
-            }, quandoFalha = {
-                mostraErro(MENSAGEM_FALHA_CARREGAR_NOTICIAS)
-            }
-        )
+        viewModel.buscaTodos().observe(this, { noticias: List<Noticia> ->
+            adapter.atualiza(noticias)
+        })
     }
 
     private fun abreFormularioModoCriacao() {
