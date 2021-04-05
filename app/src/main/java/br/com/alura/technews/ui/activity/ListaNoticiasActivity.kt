@@ -10,12 +10,15 @@ import br.com.alura.technews.R
 import br.com.alura.technews.database.AppDatabase
 import br.com.alura.technews.model.Noticia
 import br.com.alura.technews.repository.NoticiaRepository
+import br.com.alura.technews.repository.Resource
+import br.com.alura.technews.ui.activity.extensions.mostraErro
 import br.com.alura.technews.ui.recyclerview.adapter.ListaNoticiasAdapter
 import br.com.alura.technews.ui.viewmodel.ListaNoticiasViewModel
 import br.com.alura.technews.ui.viewmodel.ListaNoticiasViewModelFactory
 import kotlinx.android.synthetic.main.activity_lista_noticias.*
 
 private const val TITULO_APPBAR = "Notícias"
+private const val MENSAGEM_FALHA_CARREGAR_NOTICIAS = "Não foi possível carregar as novas notícias"
 
 class ListaNoticiasActivity : AppCompatActivity() {
 
@@ -60,8 +63,9 @@ class ListaNoticiasActivity : AppCompatActivity() {
     }
 
     private fun buscaNoticias() {
-        viewModel.buscaTodos().observe(this, { noticias: List<Noticia> ->
-            adapter.atualiza(noticias)
+        viewModel.buscaTodos().observe(this, { resource: Resource<List<Noticia>?> ->
+            resource.dado?.let { adapter.atualiza(resource.dado) }
+            resource.erro?.let { mostraErro(MENSAGEM_FALHA_CARREGAR_NOTICIAS) }
         })
     }
 
