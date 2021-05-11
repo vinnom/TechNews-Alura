@@ -4,11 +4,17 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import br.com.alura.technews.R
 import br.com.alura.technews.database.AppDatabase
 import br.com.alura.technews.model.Noticia
 import br.com.alura.technews.repository.NoticiaRepository
+import br.com.alura.technews.repository.Resource
 import br.com.alura.technews.ui.activity.extensions.mostraErro
+import br.com.alura.technews.ui.viewmodel.FormularioNoticiaViewModel
+import br.com.alura.technews.ui.viewmodel.NoticiaViewModelFactory
 import kotlinx.android.synthetic.main.activity_formulario_noticia.*
 
 private const val TITULO_APPBAR_EDICAO = "Editando notícia"
@@ -20,8 +26,17 @@ class FormularioNoticiaActivity : AppCompatActivity() {
     private val noticiaId: Long by lazy {
         intent.getLongExtra(NOTICIA_ID_CHAVE, 0)
     }
+
     private val repository by lazy {
         NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
+    }
+
+    private val viewModel by lazy {
+        val factory = NoticiaViewModelFactory(
+            FormularioNoticiaViewModel::class.java as Class<ViewModel>,
+            repository
+        )
+        ViewModelProvider(this, factory).get(FormularioNoticiaViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,11 +94,13 @@ class FormularioNoticiaActivity : AppCompatActivity() {
                 quandoFalha = falha
             )
         } else {
-            repository.salva(
-                noticia,
-                quandoSucesso = sucesso,
-                quandoFalha = falha
-            )
+            viewModel.salva(noticia).observe(this, { resouce: Resource<Void?> ->
+                if (resouce.erro == null) {
+                    finish()
+                } else {
+                    mostraErro(MENSAGEM_ERRO_SALVAR)
+                }
+            })
         }
     }
 

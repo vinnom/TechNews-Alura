@@ -3,6 +3,7 @@ package br.com.alura.technews.ui.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager.VERTICAL
@@ -14,7 +15,7 @@ import br.com.alura.technews.repository.Resource
 import br.com.alura.technews.ui.activity.extensions.mostraErro
 import br.com.alura.technews.ui.recyclerview.adapter.ListaNoticiasAdapter
 import br.com.alura.technews.ui.viewmodel.ListaNoticiasViewModel
-import br.com.alura.technews.ui.viewmodel.ListaNoticiasViewModelFactory
+import br.com.alura.technews.ui.viewmodel.NoticiaViewModelFactory
 import kotlinx.android.synthetic.main.activity_lista_noticias.*
 
 private const val TITULO_APPBAR = "Notícias"
@@ -28,7 +29,10 @@ class ListaNoticiasActivity : AppCompatActivity() {
 
     private val viewModel by lazy {
         val repository = NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
-        val factory = ListaNoticiasViewModelFactory(repository)
+        val factory = NoticiaViewModelFactory(
+            ListaNoticiasViewModel::class.java as Class<ViewModel>,
+            repository
+        )
         ViewModelProvider(this, factory).get(ListaNoticiasViewModel::class.java)
     }
 
