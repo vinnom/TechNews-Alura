@@ -4,7 +4,7 @@ open class Resource<T>(val dado: T?, val erro: String? = null) {}
 
 class SucessoResource<T>(dado: T) : Resource<T>(dado){
 
-    fun atualizaLista(): Resource<T?>{
+    fun atualiza(): Resource<T?>{
         return Resource(dado = dado)
     }
 }

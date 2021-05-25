@@ -1,4 +1,3 @@
-
 package br.com.alura.technews.ui.activity
 
 import android.content.Intent
@@ -6,11 +5,15 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import br.com.alura.technews.R
 import br.com.alura.technews.database.AppDatabase
 import br.com.alura.technews.model.Noticia
 import br.com.alura.technews.repository.NoticiaRepository
 import br.com.alura.technews.ui.activity.extensions.mostraErro
+import br.com.alura.technews.ui.viewmodel.NoticiaViewModelFactory
+import br.com.alura.technews.ui.viewmodel.VisualizaNoticiaViewModel
 import kotlinx.android.synthetic.main.activity_visualiza_noticia.*
 
 private const val NOTICIA_NAO_ENCONTRADA = "Notícia não encontrada"
@@ -22,10 +25,15 @@ class VisualizaNoticiaActivity : AppCompatActivity() {
     private val noticiaId: Long by lazy {
         intent.getLongExtra(NOTICIA_ID_CHAVE, 0)
     }
-    private val repository by lazy {
-        NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
+
+    private val viewModel by lazy {
+        val repository = NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
+        val factory = NoticiaViewModelFactory(
+            VisualizaNoticiaViewModel::class.java as Class<ViewModel>,
+            repository
+        )
+        ViewModelProvider(this, factory).get(VisualizaNoticiaViewModel::class.java)
     }
-    private lateinit var noticia: Noticia
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,10 +61,9 @@ class VisualizaNoticiaActivity : AppCompatActivity() {
     }
 
     private fun buscaNoticiaSelecionada() {
-        repository.buscaPorId(noticiaId, quandoSucesso = { noticiaEncontrada ->
-            noticiaEncontrada?.let {
-                this.noticia = it
-                preencheCampos(it)
+        viewModel.buscaPorId(noticiaId).observe(this, { noticia ->
+            if (noticia != null) {
+                preencheCampos(noticia)
             }
         })
     }
@@ -74,13 +81,18 @@ class VisualizaNoticiaActivity : AppCompatActivity() {
     }
 
     private fun remove() {
-        if (::noticia.isInitialized) {
-            repository.remove(noticia, quandoSucesso = {
-                finish()
-            }, quandoFalha = {
-                mostraErro(MENSAGEM_FALHA_REMOCAO)
-            })
-        }
+        viewModel.buscaPorId(noticiaId).observe(this, { noticia ->
+            if (noticia != null) {
+                viewModel.remove(noticia).observe(this, { resource ->
+                    if (resource.erro == null) {
+                        finish()
+                    } else {
+                        mostraErro(MENSAGEM_FALHA_REMOCAO)
+                    }
+                })
+            }
+        })
+
     }
 
     private fun abreFormularioEdicao() {

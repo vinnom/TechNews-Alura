@@ -27,11 +27,8 @@ class FormularioNoticiaActivity : AppCompatActivity() {
         intent.getLongExtra(NOTICIA_ID_CHAVE, 0)
     }
 
-    private val repository by lazy {
-        NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
-    }
-
     private val viewModel by lazy {
+        val repository = NoticiaRepository(AppDatabase.getInstance(this).noticiaDAO)
         val factory = NoticiaViewModelFactory(
             FormularioNoticiaViewModel::class.java as Class<ViewModel>,
             repository
@@ -55,10 +52,10 @@ class FormularioNoticiaActivity : AppCompatActivity() {
     }
 
     private fun preencheFormulario() {
-        repository.buscaPorId(noticiaId, quandoSucesso = { noticiaEncontrada ->
-            if (noticiaEncontrada != null) {
-                activity_formulario_noticia_titulo.setText(noticiaEncontrada.titulo)
-                activity_formulario_noticia_texto.setText(noticiaEncontrada.texto)
+        viewModel.buscaPorId(noticiaId).observe(this, { noticia ->
+            if (noticia != null) {
+                activity_formulario_noticia_titulo.setText(noticia.titulo)
+                activity_formulario_noticia_texto.setText(noticia.texto)
             }
         })
     }
@@ -80,29 +77,12 @@ class FormularioNoticiaActivity : AppCompatActivity() {
     }
 
     private fun salva(noticia: Noticia) {
-        val falha = { _: String? ->
-            mostraErro(MENSAGEM_ERRO_SALVAR)
-        }
-        val sucesso = { _: Noticia ->
-            finish()
-        }
-
-        if (noticia.id > 0) {
-            repository.edita(
-                noticia,
-                quandoSucesso = sucesso,
-                quandoFalha = falha
-            )
-        } else {
-            viewModel.salva(noticia).observe(this, { resouce: Resource<Void?> ->
-                if (resouce.erro == null) {
-                    finish()
-                } else {
-                    mostraErro(MENSAGEM_ERRO_SALVAR)
-                }
-            })
-        }
+        viewModel.salva(noticia).observe(this, { resource ->
+            if (resource.erro == null) {
+                finish()
+            } else {
+                mostraErro(MENSAGEM_ERRO_SALVAR)
+            }
+        })
     }
-
-
 }

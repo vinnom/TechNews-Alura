@@ -16,7 +16,7 @@ class NoticiaRepository(
 
     fun buscaTodos(): LiveData<Resource<List<Noticia>?>> {
         val atualizaLista = { noticias: List<Noticia> ->
-            listaNoticias.value = SucessoResource(noticias).atualizaLista()
+            listaNoticias.value = SucessoResource(noticias).atualiza()
         }
         buscaInterno(quandoSucesso = atualizaLista)
         buscaNaApi(quandoSucesso = atualizaLista, quandoFalha = { erro: String? ->
@@ -38,30 +38,40 @@ class NoticiaRepository(
         return liveData
     }
 
-    fun remove(
-        noticia: Noticia,
-        quandoSucesso: () -> Unit,
-        quandoFalha: (erro: String?) -> Unit
-    ) {
-        removeNaApi(noticia, quandoSucesso, quandoFalha)
+    fun remove(noticia: Noticia): LiveData<Resource<Void?>> {
+        val liveData = MutableLiveData<Resource<Void?>>()
+        removeNaApi(
+            noticia,
+            quandoSucesso = {
+                liveData.value = Resource(dado = null)
+            },
+            quandoFalha = { erro: String? ->
+                liveData.value = Resource(dado = null, erro = erro)
+            }
+        )
+        return liveData
     }
 
-    fun edita(
-        noticia: Noticia,
-        quandoSucesso: (noticiaEditada: Noticia) -> Unit,
-        quandoFalha: (erro: String?) -> Unit
-    ) {
-        editaNaApi(noticia, quandoSucesso, quandoFalha)
+    fun edita(noticia: Noticia): LiveData<Resource<Void?>> {
+        val liveData = MutableLiveData<Resource<Void?>>()
+        editaNaApi(noticia,
+            quandoSucesso = {
+                liveData.value = Resource(dado = null)
+            },
+            quandoFalha = { erro ->
+                liveData.value = Resource(dado = null, erro = erro)
+            })
+        return liveData
     }
 
-    fun buscaPorId(
-        noticiaId: Long,
-        quandoSucesso: (noticiaEncontrada: Noticia?) -> Unit
-    ) {
+    fun buscaPorId(noticiaId: Long): LiveData<Noticia?> {
+        val liveData = MutableLiveData<Noticia?>()
         BaseAsyncTask(quandoExecuta = {
             dao.buscaPorId(noticiaId)
-        }, quandoFinaliza = quandoSucesso)
-            .execute()
+        }, quandoFinaliza = { noticia ->
+            liveData.value = noticia
+        }).execute()
+        return liveData
     }
 
     private fun buscaNaApi(
