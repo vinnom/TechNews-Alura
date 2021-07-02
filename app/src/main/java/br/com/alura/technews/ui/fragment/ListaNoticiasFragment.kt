@@ -36,7 +36,7 @@ class ListaNoticiasFragment : Fragment() {
     }
 
     private val viewModel: ListaNoticiasViewModel by lazy {
-        if (context != null) {
+        context?.let {
             val repository = NoticiaRepository(AppDatabase.getInstance(context!!).noticiaDAO)
             val factory = NoticiaViewModelFactory(
                 ListaNoticiasViewModel::class.java as Class<ViewModel>,
@@ -46,9 +46,7 @@ class ListaNoticiasFragment : Fragment() {
                 context as AppCompatActivity,
                 factory
             ).get(ListaNoticiasViewModel::class.java)
-        } else {
-            throw IllegalArgumentException("Contexto inválido")
-        }
+        } ?: throw IllegalAccessException("Contexto inválido")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

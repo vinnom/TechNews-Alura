@@ -9,7 +9,12 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_lista_noticias.xml" value="0.35260416666666666" />
+        <entry key="app/src/main/res/layout/activity_visualiza_noticia.xml" value="0.1921875" />
+        <entry key="app/src/main/res/layout/item_noticia.xml" value="0.20416666666666666" />
         <entry key="app/src/main/res/layout/lista_noticiais.xml" value="0.35260416666666666" />
+        <entry key="app/src/main/res/layout/lista_noticias.xml" value="0.35260416666666666" />
+        <entry key="app/src/main/res/layout/visualiza_noticias.xml" value="0.1921875" />
+        <entry key="app/src/main/res/menu/visualiza_noticia_menu.xml" value="0.1765625" />
       </map>
     </option>
   </component>
