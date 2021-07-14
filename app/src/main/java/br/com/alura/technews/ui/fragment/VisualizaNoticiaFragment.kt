@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.visualiza_noticias.*
 
 private const val NOTICIA_NAO_ENCONTRADA = "Notícia não encontrada"
 private const val MENSAGEM_FALHA_REMOCAO = "Não foi possível remover notícia"
+private const val TITULO_APPBAR = "Notícia"
 
 class VisualizaNoticiaFragment : Fragment() {
 
@@ -31,14 +32,14 @@ class VisualizaNoticiaFragment : Fragment() {
     }
 
     private val viewModel by lazy {
-        context?.let {
-            val repository = NoticiaRepository(AppDatabase.getInstance(context!!).noticiaDAO)
+        context?.let { contexto ->
+            val repository = NoticiaRepository(AppDatabase.getInstance(contexto).noticiaDAO)
             val factory = NoticiaViewModelFactory(
                 VisualizaNoticiaViewModel::class.java as Class<ViewModel>,
                 repository
             )
             ViewModelProvider(
-                context as AppCompatActivity,
+                contexto as AppCompatActivity,
                 factory
             ).get(VisualizaNoticiaViewModel::class.java)
         } ?: throw IllegalArgumentException("Contexto inválido!")
@@ -59,6 +60,7 @@ class VisualizaNoticiaFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        activity?.title = TITULO_APPBAR
         buscaNoticiaSelecionada()
     }
 

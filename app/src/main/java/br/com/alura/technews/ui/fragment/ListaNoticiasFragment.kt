@@ -22,6 +22,7 @@ import br.com.alura.technews.ui.viewmodel.NoticiaViewModelFactory
 import kotlinx.android.synthetic.main.lista_noticias.*
 
 private const val MENSAGEM_FALHA_CARREGAR_NOTICIAS = "Não foi possível carregar as novas notícias"
+private const val TITULO_APPBAR = "Notícias"
 
 class ListaNoticiasFragment : Fragment() {
 
@@ -36,14 +37,14 @@ class ListaNoticiasFragment : Fragment() {
     }
 
     private val viewModel: ListaNoticiasViewModel by lazy {
-        context?.let {
-            val repository = NoticiaRepository(AppDatabase.getInstance(context!!).noticiaDAO)
+        context?.let { contexto ->
+            val repository = NoticiaRepository(AppDatabase.getInstance(contexto).noticiaDAO)
             val factory = NoticiaViewModelFactory(
                 ListaNoticiasViewModel::class.java as Class<ViewModel>,
                 repository
             )
             ViewModelProvider(
-                context as AppCompatActivity,
+                contexto as AppCompatActivity,
                 factory
             ).get(ListaNoticiasViewModel::class.java)
         } ?: throw IllegalAccessException("Contexto inválido")
@@ -64,6 +65,7 @@ class ListaNoticiasFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        activity?.title = TITULO_APPBAR
         configuraRecyclerView()
         configuraFabAdicionaNoticia()
     }
