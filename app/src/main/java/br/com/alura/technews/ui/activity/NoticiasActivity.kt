@@ -1,6 +1,7 @@
 package br.com.alura.technews.ui.activity
 
 import android.content.Intent
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -9,6 +10,8 @@ import br.com.alura.technews.model.Noticia
 import br.com.alura.technews.ui.activity.extensions.geraTransacaoFragment
 import br.com.alura.technews.ui.fragment.ListaNoticiasFragment
 import br.com.alura.technews.ui.fragment.VisualizaNoticiaFragment
+
+private const val TAG_FRAGMENT_VISUALIZA_NOTICIA = "visualizaNoticia"
 
 class NoticiasActivity : AppCompatActivity() {
 
@@ -20,9 +23,36 @@ class NoticiasActivity : AppCompatActivity() {
     }
 
     private fun abreListaNoticias(savedInstanceState: Bundle?) {
-        if (savedInstanceState == null) {
-            geraTransacaoFragment {
-                this.add(R.id.noticias_container, ListaNoticiasFragment())
+        when (savedInstanceState) {
+            null -> {
+                geraTransacaoFragment {
+                    this.add(R.id.noticias_container_primario, ListaNoticiasFragment())
+                }
+            }
+            else -> {
+                supportFragmentManager.apply {
+                    this.popBackStack()
+                    this.findFragmentByTag(TAG_FRAGMENT_VISUALIZA_NOTICIA)?.let { fragment ->
+                        val argumentos = fragment.arguments
+                        val novoFragment = VisualizaNoticiaFragment()
+                        novoFragment.arguments = argumentos
+
+                        geraTransacaoFragment { this.remove(fragment) }
+
+                        geraTransacaoFragment {
+                            val container = when (resources.configuration.orientation) {
+
+                                ORIENTATION_LANDSCAPE -> R.id.noticias_container_secundario
+                                else -> {
+                                    this.addToBackStack(null)
+                                    R.id.noticias_container_primario
+                                }
+                            }
+
+                            this.replace(container, novoFragment, TAG_FRAGMENT_VISUALIZA_NOTICIA)
+                        }
+                    }
+                }
             }
         }
     }
@@ -54,8 +84,15 @@ class NoticiasActivity : AppCompatActivity() {
         fragment.arguments = dados
 
         geraTransacaoFragment {
-            this.addToBackStack(null)
-            this.replace(R.id.noticias_container, fragment)
+            val container = when (resources.configuration.orientation) {
+                ORIENTATION_LANDSCAPE -> R.id.noticias_container_secundario
+                else -> {
+                    this.addToBackStack(null)
+                    R.id.noticias_container_primario
+                }
+            }
+
+            this.replace(container, fragment, TAG_FRAGMENT_VISUALIZA_NOTICIA)
         }
     }
 
